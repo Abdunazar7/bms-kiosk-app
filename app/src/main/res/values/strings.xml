@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kiosk Browser</string>
+    <string name="settings_title">Kiosk Settings</string>
+
+    <!-- Admin dialog -->
+    <string name="admin_access">Admin Access</string>
+    <string name="admin_menu">Admin Menu</string>
+    <string name="enter_pin">Enter PIN</string>
+    <string name="wrong_pin">Wrong PIN</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="exit">Exit</string>
+    <string name="menu_settings">Open Settings</string>
+    <string name="menu_reload">Reload Page</string>
+    <string name="menu_go_home">Go to Start URL</string>
+    <string name="menu_unlock_exit">Unlock &amp; Exit Kiosk</string>
+    <string name="exit_kiosk">Exit Kiosk?</string>
+    <string name="exit_kiosk_msg">This will unpin the screen and close the kiosk app.</string>
+
+    <!-- Preference categories -->
+    <string name="cat_general">General</string>
+    <string name="cat_display">Display</string>
+    <string name="cat_kiosk">Kiosk Behaviour</string>
+
+    <!-- Preferences -->
+    <string name="pref_start_url">Start URL</string>
+    <string name="pref_start_url_sum">The page loaded when the kiosk launches</string>
+    <string name="pref_admin_pin">Admin PIN</string>
+    <string name="pref_admin_pin_sum">Protects this settings panel (default 1234)</string>
+    <string name="pref_allowed_hosts">Allowed hosts</string>
+    <string name="pref_allowed_hosts_sum">Comma-separated host whitelist. Empty = allow all.</string>
+    <string name="pref_fullscreen">Fullscreen (immersive)</string>
+    <string name="pref_fullscreen_sum">Hide the status and navigation bars</string>
+    <string name="pref_keep_screen_on">Keep screen on</string>
+    <string name="pref_keep_screen_on_sum">Prevent the display from sleeping</string>
+    <string name="pref_zoom">Allow pinch zoom</string>
+    <string name="pref_desktop_mode">Desktop mode</string>
+    <string name="pref_desktop_mode_sum">Request desktop versions of websites</string>
+    <string name="pref_lock_task">Lock task (screen pinning)</string>
+    <string name="pref_lock_task_sum">Pin the app so users cannot leave it</string>
+    <string name="pref_start_on_boot">Start on boot</string>
+    <string name="pref_start_on_boot_sum">Auto-launch the kiosk after device restart</string>
+    <string name="pref_js">Enable JavaScript</string>
+    <string name="pref_pull_refresh">Pull to refresh</string>
+    <string name="pref_idle_reset">Idle reset (seconds)</string>
+    <string name="pref_idle_reset_sum">Return to Start URL after inactivity. 0 = off.</string>
+    <string name="pref_auto_reload">Auto reload (seconds)</string>
+    <string name="pref_auto_reload_sum">Reload the page on an interval. 0 = off.</string>
+</resources>

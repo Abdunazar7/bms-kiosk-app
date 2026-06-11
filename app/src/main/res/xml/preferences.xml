@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/cat_general">
+
+        <EditTextPreference
+            android:key="start_url"
+            android:title="@string/pref_start_url"
+            android:summary="@string/pref_start_url_sum"
+            android:defaultValue="https://www.google.com"
+            android:dialogTitle="@string/pref_start_url" />
+
+        <EditTextPreference
+            android:key="admin_pin"
+            android:title="@string/pref_admin_pin"
+            android:summary="@string/pref_admin_pin_sum"
+            android:defaultValue="1234"
+            android:inputType="numberPassword"
+            android:dialogTitle="@string/pref_admin_pin" />
+
+        <EditTextPreference
+            android:key="allowed_hosts"
+            android:title="@string/pref_allowed_hosts"
+            android:summary="@string/pref_allowed_hosts_sum"
+            android:dialogTitle="@string/pref_allowed_hosts" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/cat_display">
+
+        <SwitchPreferenceCompat
+            android:key="fullscreen"
+            android:title="@string/pref_fullscreen"
+            android:summary="@string/pref_fullscreen_sum"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="keep_screen_on"
+            android:title="@string/pref_keep_screen_on"
+            android:summary="@string/pref_keep_screen_on_sum"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="zoom_enabled"
+            android:title="@string/pref_zoom"
+            android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="desktop_mode"
+            android:title="@string/pref_desktop_mode"
+            android:summary="@string/pref_desktop_mode_sum"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/cat_kiosk">
+
+        <SwitchPreferenceCompat
+            android:key="lock_task"
+            android:title="@string/pref_lock_task"
+            android:summary="@string/pref_lock_task_sum"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="start_on_boot"
+            android:title="@string/pref_start_on_boot"
+            android:summary="@string/pref_start_on_boot_sum"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="javascript_enabled"
+            android:title="@string/pref_js"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="pull_to_refresh"
+            android:title="@string/pref_pull_refresh"
+            android:defaultValue="true" />
+
+        <EditTextPreference
+            android:key="idle_reset_seconds"
+            android:title="@string/pref_idle_reset"
+            android:summary="@string/pref_idle_reset_sum"
+            android:defaultValue="0"
+            android:inputType="number"
+            android:dialogTitle="@string/pref_idle_reset" />
+
+        <EditTextPreference
+            android:key="auto_reload_seconds"
+            android:title="@string/pref_auto_reload"
+            android:summary="@string/pref_auto_reload_sum"
+            android:defaultValue="0"
+            android:inputType="number"
+            android:dialogTitle="@string/pref_auto_reload" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
