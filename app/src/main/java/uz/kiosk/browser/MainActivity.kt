@@ -297,15 +297,16 @@ class MainActivity : AppCompatActivity() {
 
     // region Hidden admin access
     /**
-     * Tapping ANYWHERE on the screen 5 times in quick succession opens the
-     * PIN-protected admin dialog. Counting happens in [dispatchTouchEvent] so it
-     * works from any position without blocking normal web interaction.
+     * Opens the PIN dialog only on a FAST burst of taps anywhere on screen:
+     * [ADMIN_TAP_COUNT] taps where each is within [TAP_MAX_GAP_MS] of the last.
+     * Any slower/normal tap breaks the streak, so ordinary use never triggers it.
+     * Counting happens in [dispatchTouchEvent] so it works from any position.
      */
     private fun registerAdminTap() {
         val now = System.currentTimeMillis()
-        if (now - lastTapTime > TAP_RESET_MS) cornerTapCount = 0
+        // A gap longer than the threshold means this isn't a fast burst: start over.
+        cornerTapCount = if (now - lastTapTime > TAP_MAX_GAP_MS) 1 else cornerTapCount + 1
         lastTapTime = now
-        cornerTapCount++
         if (cornerTapCount >= ADMIN_TAP_COUNT) {
             cornerTapCount = 0
             if (!isPinDialogShowing) promptForPin()
@@ -385,6 +386,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         applyImmersive()
+        // Re-read toggles that may have changed in settings.
+        binding.swipeRefresh.isEnabled = prefs.pullToRefresh
         // The Kiosk Mode toggle in settings drives screen pinning: enabling it
         // pins the app, disabling it unpins (the way to leave the kiosk).
         if (prefs.lockTask) startKioskLock() else stopKioskLock()
@@ -410,10 +413,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        /** Number of quick taps anywhere on screen to reveal the admin PIN dialog. */
+        /** Number of fast taps anywhere on screen to reveal the admin PIN dialog. */
         private const val ADMIN_TAP_COUNT = 8
 
-        /** Taps must arrive within this window of each other to count toward the gesture. */
-        private const val TAP_RESET_MS = 2000L
+        /** Max gap between consecutive taps to count as one fast burst (ms). */
+        private const val TAP_MAX_GAP_MS = 400L
     }
 }

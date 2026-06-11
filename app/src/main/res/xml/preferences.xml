@@ -74,7 +74,8 @@
         <SwitchPreferenceCompat
             android:key="pull_to_refresh"
             android:title="@string/pref_pull_refresh"
-            android:defaultValue="true" />
+            android:summary="@string/pref_pull_refresh_sum"
+            android:defaultValue="false" />
 
         <EditTextPreference
             android:key="idle_reset_seconds"

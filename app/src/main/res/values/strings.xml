@@ -53,6 +53,7 @@
     <string name="pref_start_on_boot_sum">Auto-launch the kiosk after device restart</string>
     <string name="pref_js">Enable JavaScript</string>
     <string name="pref_pull_refresh">Pull to refresh</string>
+    <string name="pref_pull_refresh_sum">Swipe down to reload. Off by default — avoids clashing with switches near the top.</string>
     <string name="pref_idle_reset">Idle reset (seconds)</string>
     <string name="pref_idle_reset_sum">Return to Start URL after inactivity. 0 = off.</string>
     <string name="pref_auto_reload">Auto reload (seconds)</string>

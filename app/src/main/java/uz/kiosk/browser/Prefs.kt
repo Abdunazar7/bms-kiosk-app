@@ -55,7 +55,7 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_ZOOM, false)
 
     val pullToRefresh: Boolean
-        get() = sp.getBoolean(KEY_PULL_REFRESH, true)
+        get() = sp.getBoolean(KEY_PULL_REFRESH, false)
 
     val desktopMode: Boolean
         get() = sp.getBoolean(KEY_DESKTOP_MODE, false)
