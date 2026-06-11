@@ -7,8 +7,8 @@ full-screen WebView that users cannot exit, with a hidden PIN-protected admin pa
 ## Features
 
 - **First-run setup** — on first launch the app asks for the single URL to lock to (no default search engine); only that URL opens.
-- **No title bar** — clean WebView; the system **status bar stays visible and can be pulled down**.
-- **Kiosk Mode toggle** — a switch in settings drives screen pinning. Turn it **off to leave the kiosk** (not via the Back/Recents buttons).
+- **Fullscreen toggle** — hides the status bar **and** navigation bar (immersive). Hiding the nav bar also removes easy Back/Recents access, making it much harder to leave. Toggle it in settings.
+- **Kiosk Mode toggle** — a switch in settings drives screen pinning. Turn it **off to leave the kiosk**.
 - **Hidden admin access** — **tap anywhere on the screen 8× quickly**, then enter the PIN (default `1234`).
 - **HTTP control endpoint** — Home Assistant / curl can send commands (`screenOn`, `loadUrl`, …) — see below.
 - **Screen control left to the device** — brightness and sleep follow the tablet's own settings; remote `screenOn` wakes it.

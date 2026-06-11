@@ -40,8 +40,8 @@
     <string name="pref_admin_pin_sum">Protects this settings panel (default 1234)</string>
     <string name="pref_allowed_hosts">Allowed hosts</string>
     <string name="pref_allowed_hosts_sum">Comma-separated host whitelist. Empty = allow all.</string>
-    <string name="pref_fullscreen">Fullscreen (immersive)</string>
-    <string name="pref_fullscreen_sum">Hide the status and navigation bars</string>
+    <string name="pref_hide_bars">Hide system bars</string>
+    <string name="pref_hide_bars_sum">Hide the status bar and navigation bar (fullscreen). Turn off to show them.</string>
     <string name="pref_keep_screen_on">Keep screen on</string>
     <string name="pref_keep_screen_on_sum">Prevent the display from sleeping</string>
     <string name="pref_zoom">Allow pinch zoom</string>

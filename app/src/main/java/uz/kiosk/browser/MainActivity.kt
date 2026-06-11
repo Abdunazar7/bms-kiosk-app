@@ -30,6 +30,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import uz.kiosk.browser.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -150,10 +152,31 @@ class MainActivity : AppCompatActivity() {
                     WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             )
         }
-        // The system status bar stays visible and pull-down works. Lock-task
-        // mode (the Kiosk Mode toggle) is what prevents leaving the app, not
-        // hiding the bars.
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        applyImmersive()
+    }
+
+    /**
+     * When the "Hide system bars" toggle is on, hide BOTH the status bar and
+     * the navigation bar (immersive). Hiding the nav bar also removes the
+     * easy Back/Recents access, making it much harder to leave the kiosk.
+     * When off, the bars are shown normally.
+     */
+    private fun applyImmersive() {
+        val controller = WindowInsetsControllerCompat(window, binding.root)
+        if (prefs.hideSystemBars) {
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else {
+            controller.show(WindowInsetsCompat.Type.systemBars())
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) applyImmersive()
     }
     // endregion
 
@@ -361,6 +384,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        applyImmersive()
         // The Kiosk Mode toggle in settings drives screen pinning: enabling it
         // pins the app, disabling it unpins (the way to leave the kiosk).
         if (prefs.lockTask) startKioskLock() else stopKioskLock()

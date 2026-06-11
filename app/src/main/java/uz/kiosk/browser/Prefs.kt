@@ -29,8 +29,9 @@ class Prefs(context: Context) {
     val keepScreenOn: Boolean
         get() = sp.getBoolean(KEY_KEEP_SCREEN_ON, false)
 
-    val fullscreen: Boolean
-        get() = sp.getBoolean(KEY_FULLSCREEN, true)
+    /** Hide both the status bar and navigation bar (immersive fullscreen). */
+    val hideSystemBars: Boolean
+        get() = sp.getBoolean(KEY_HIDE_BARS, true)
 
     /** Kiosk Mode = lock-task / screen pinning. Turning this off leaves the kiosk. */
     val lockTask: Boolean
@@ -83,7 +84,7 @@ class Prefs(context: Context) {
         const val KEY_START_URL = "start_url"
         const val KEY_ADMIN_PIN = "admin_pin"
         const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
-        const val KEY_FULLSCREEN = "fullscreen"
+        const val KEY_HIDE_BARS = "hide_system_bars"
         const val KEY_LOCK_TASK = "lock_task"
         const val KEY_JS = "javascript_enabled"
         const val KEY_ZOOM = "zoom_enabled"

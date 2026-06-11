@@ -28,6 +28,12 @@
     <PreferenceCategory android:title="@string/cat_display">
 
         <SwitchPreferenceCompat
+            android:key="hide_system_bars"
+            android:title="@string/pref_hide_bars"
+            android:summary="@string/pref_hide_bars_sum"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
             android:key="keep_screen_on"
             android:title="@string/pref_keep_screen_on"
             android:summary="@string/pref_keep_screen_on_sum"
