@@ -4,6 +4,11 @@ A fully-functional kiosk web browser for Android — a lightweight, open alterna
 to *Fully Kiosk Browser*. It opens a configured website in a locked-down,
 full-screen WebView that users cannot exit, with a hidden PIN-protected admin panel.
 
+## 📥 Download
+
+Pre-built, signed APKs are published as releases here:
+**[github.com/Abdunazar7/kiosk-release/releases/latest](https://github.com/Abdunazar7/kiosk-release/releases/latest)**
+
 ## Features
 
 - **First-run setup** — on first launch the app asks for the single URL to lock to (no default search engine); only that URL opens.
