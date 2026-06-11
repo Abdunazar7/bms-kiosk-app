@@ -96,6 +96,11 @@
 
     <PreferenceCategory android:title="@string/cat_remote">
 
+        <Preference
+            android:key="device_ip"
+            android:title="@string/pref_device_ip"
+            android:selectable="false" />
+
         <SwitchPreferenceCompat
             android:key="remote_enabled"
             android:title="@string/pref_remote_enabled"

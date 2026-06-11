@@ -60,6 +60,8 @@
 
     <!-- Remote HTTP control -->
     <string name="cat_remote">Remote Control (HTTP)</string>
+    <string name="pref_device_ip">This device address</string>
+    <string name="pref_device_ip_unknown">Not connected to Wi-Fi</string>
     <string name="pref_remote_enabled">Enable HTTP control</string>
     <string name="pref_remote_enabled_sum">Let Home Assistant / curl send commands to this device</string>
     <string name="pref_remote_port">HTTP port</string>
