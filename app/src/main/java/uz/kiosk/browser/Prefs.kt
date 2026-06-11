@@ -27,13 +27,25 @@ class Prefs(context: Context) {
         set(value) = sp.edit().putString(KEY_ADMIN_PIN, value).apply()
 
     val keepScreenOn: Boolean
-        get() = sp.getBoolean(KEY_KEEP_SCREEN_ON, true)
+        get() = sp.getBoolean(KEY_KEEP_SCREEN_ON, false)
 
     val fullscreen: Boolean
         get() = sp.getBoolean(KEY_FULLSCREEN, true)
 
+    /** Kiosk Mode = lock-task / screen pinning. Turning this off leaves the kiosk. */
     val lockTask: Boolean
         get() = sp.getBoolean(KEY_LOCK_TASK, true)
+
+    // region Remote HTTP control (Home Assistant etc.)
+    val remoteEnabled: Boolean
+        get() = sp.getBoolean(KEY_REMOTE_ENABLED, true)
+
+    val remotePort: Int
+        get() = sp.getString(KEY_REMOTE_PORT, "2323")!!.toIntOrNull() ?: 2323
+
+    val remotePassword: String
+        get() = sp.getString(KEY_REMOTE_PASSWORD, DEFAULT_PIN)!!.ifEmpty { DEFAULT_PIN }
+    // endregion
 
     val javascriptEnabled: Boolean
         get() = sp.getBoolean(KEY_JS, true)
@@ -77,6 +89,9 @@ class Prefs(context: Context) {
         const val KEY_ZOOM = "zoom_enabled"
         const val KEY_PULL_REFRESH = "pull_to_refresh"
         const val KEY_DESKTOP_MODE = "desktop_mode"
+        const val KEY_REMOTE_ENABLED = "remote_enabled"
+        const val KEY_REMOTE_PORT = "remote_port"
+        const val KEY_REMOTE_PASSWORD = "remote_password"
         const val KEY_START_ON_BOOT = "start_on_boot"
         const val KEY_IDLE_RESET = "idle_reset_seconds"
         const val KEY_AUTO_RELOAD = "auto_reload_seconds"

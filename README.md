@@ -7,9 +7,11 @@ full-screen WebView that users cannot exit, with a hidden PIN-protected admin pa
 ## Features
 
 - **First-run setup** — on first launch the app asks for the single URL to lock to (no default search engine); only that URL opens.
-- **Full-screen immersive WebView** — status & navigation bars hidden, no title/top bar.
-- **Lock-task / screen pinning** — prevents leaving the app (true kiosk when set as Device Owner).
-- **Hidden admin access** — **tap anywhere on the screen 5× quickly**, then enter the PIN (default `1234`).
+- **No title bar** — clean WebView; the system **status bar stays visible and can be pulled down**.
+- **Kiosk Mode toggle** — a switch in settings drives screen pinning. Turn it **off to leave the kiosk** (not via the Back/Recents buttons).
+- **Hidden admin access** — **tap anywhere on the screen 8× quickly**, then enter the PIN (default `1234`).
+- **HTTP control endpoint** — Home Assistant / curl can send commands (`screenOn`, `loadUrl`, …) — see below.
+- **Screen control left to the device** — brightness and sleep follow the tablet's own settings; remote `screenOn` wakes it.
 - **Admin menu** — open settings, reload, go to start URL, or unlock & exit.
 - **Keep screen on** and show over the lock screen.
 - **Auto-start on boot** (`BootReceiver`).
@@ -33,6 +35,8 @@ app/src/main/
     KioskWebViewClient.kt      # Navigation control + host whitelist
     KioskChromeClient.kt       # Progress, web permissions, file upload
     WebChromeFileResult.kt     # File-chooser result parsing
+    KioskHttpService.kt        # Foreground HTTP control endpoint (Home Assistant)
+    RemoteControl.kt           # RemoteCommand + service<->activity bridge
     BootReceiver.kt            # Auto-start after reboot
     KioskDeviceAdminReceiver.kt# Device-owner / admin hook
     KioskApp.kt                # Application class
@@ -77,15 +81,60 @@ Then lock-task mode engages silently and Home/Recents are blocked.
 To remove: open the admin menu (tap screen 5× + PIN) → **Unlock & Exit**, or
 `adb shell dpm remove-active-admin uz.kiosk.browser/.KioskDeviceAdminReceiver`.
 
+## Remote HTTP control (Home Assistant)
+
+The app runs a small HTTP endpoint (default port **2323**, password **1234**)
+so home automation can control it. Configure both in **Settings → Remote
+Control (HTTP)**.
+
+```
+http://<device-ip>:2323/?cmd=screenOn&type=json&password=1234
+```
+
+| `cmd`          | Action                                            |
+|----------------|---------------------------------------------------|
+| `screenOn`     | Wake the screen and show the kiosk                |
+| `screenOff`    | Turn the screen off (needs Device Admin enabled)  |
+| `loadUrl`      | Load `&url=…` in the WebView                       |
+| `loadStartUrl` | Return to the configured start URL                |
+| `reload`       | Reload the current page                           |
+| `getInfo`      | Return device/app info as JSON                     |
+
+Every request must include `&password=…`. Add `&type=json` for a JSON response.
+
+### Home Assistant example
+
+```yaml
+rest_command:
+  domofon_tablet_wake:
+    url: "http://192.168.1.76:2323/?cmd=screenOn&type=json&password=1234"
+    method: GET
+
+automation:
+  - alias: "Домофон — разбудить планшет"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.domofon_vyzov
+        to: "on"
+    actions:
+      - action: rest_command.domofon_tablet_wake
+    mode: single
+```
+
+> Tip: give the tablet a static IP (here `192.168.1.76`). The endpoint works
+> while the screen is off because it runs as a foreground service.
+
 ## Default settings
 
-| Setting        | Default                       |
-|----------------|-------------------------------|
-| Start URL      | _asked on first-run setup_     |
-| Admin PIN      | `1234` (set on setup screen)  |
-| Fullscreen     | on                            |
-| Lock task      | on                            |
-| Start on boot  | on                            |
+| Setting          | Default                      |
+|------------------|------------------------------|
+| Start URL        | _asked on first-run setup_   |
+| Admin PIN        | `1234` (set on setup screen) |
+| Kiosk Mode       | on (screen pinning)          |
+| Keep screen on   | off (device controls screen) |
+| Start on boot    | on                           |
+| HTTP control     | on, port `2323`, pass `1234` |
 
-On first launch a setup screen asks for the URL and PIN. Change them later in
-the admin settings panel (tap the screen 5× → enter PIN → **Open Settings**).
+On first launch a setup screen asks for the URL and PIN. Change everything later
+in the admin panel (**tap the screen 8× → enter PIN → Open Settings**). To leave
+the kiosk, turn **Kiosk Mode** off there.

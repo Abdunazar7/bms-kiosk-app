@@ -47,8 +47,8 @@
     <string name="pref_zoom">Allow pinch zoom</string>
     <string name="pref_desktop_mode">Desktop mode</string>
     <string name="pref_desktop_mode_sum">Request desktop versions of websites</string>
-    <string name="pref_lock_task">Lock task (screen pinning)</string>
-    <string name="pref_lock_task_sum">Pin the app so users cannot leave it</string>
+    <string name="pref_lock_task">Kiosk Mode</string>
+    <string name="pref_lock_task_sum">Pin the screen so users cannot leave. Turn OFF to exit the kiosk.</string>
     <string name="pref_start_on_boot">Start on boot</string>
     <string name="pref_start_on_boot_sum">Auto-launch the kiosk after device restart</string>
     <string name="pref_js">Enable JavaScript</string>
@@ -57,4 +57,14 @@
     <string name="pref_idle_reset_sum">Return to Start URL after inactivity. 0 = off.</string>
     <string name="pref_auto_reload">Auto reload (seconds)</string>
     <string name="pref_auto_reload_sum">Reload the page on an interval. 0 = off.</string>
+
+    <!-- Remote HTTP control -->
+    <string name="cat_remote">Remote Control (HTTP)</string>
+    <string name="pref_remote_enabled">Enable HTTP control</string>
+    <string name="pref_remote_enabled_sum">Let Home Assistant / curl send commands to this device</string>
+    <string name="pref_remote_port">HTTP port</string>
+    <string name="pref_remote_port_sum">Default 2323</string>
+    <string name="pref_remote_password">HTTP password</string>
+    <string name="pref_remote_password_sum">Required on every request (?password=…)</string>
+    <string name="remote_notif_text">HTTP control listening on port %1$d</string>
 </resources>

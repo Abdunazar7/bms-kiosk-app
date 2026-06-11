@@ -28,16 +28,10 @@
     <PreferenceCategory android:title="@string/cat_display">
 
         <SwitchPreferenceCompat
-            android:key="fullscreen"
-            android:title="@string/pref_fullscreen"
-            android:summary="@string/pref_fullscreen_sum"
-            android:defaultValue="true" />
-
-        <SwitchPreferenceCompat
             android:key="keep_screen_on"
             android:title="@string/pref_keep_screen_on"
             android:summary="@string/pref_keep_screen_on_sum"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="zoom_enabled"
@@ -91,6 +85,31 @@
             android:defaultValue="0"
             android:inputType="number"
             android:dialogTitle="@string/pref_auto_reload" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/cat_remote">
+
+        <SwitchPreferenceCompat
+            android:key="remote_enabled"
+            android:title="@string/pref_remote_enabled"
+            android:summary="@string/pref_remote_enabled_sum"
+            android:defaultValue="true" />
+
+        <EditTextPreference
+            android:key="remote_port"
+            android:title="@string/pref_remote_port"
+            android:summary="@string/pref_remote_port_sum"
+            android:defaultValue="2323"
+            android:inputType="number"
+            android:dialogTitle="@string/pref_remote_port" />
+
+        <EditTextPreference
+            android:key="remote_password"
+            android:title="@string/pref_remote_password"
+            android:summary="@string/pref_remote_password_sum"
+            android:defaultValue="1234"
+            android:dialogTitle="@string/pref_remote_password" />
 
     </PreferenceCategory>
 

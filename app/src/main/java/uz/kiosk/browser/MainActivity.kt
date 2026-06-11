@@ -30,8 +30,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import uz.kiosk.browser.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -83,7 +81,20 @@ class MainActivity : AppCompatActivity() {
         setupRefresh()
         setupBackHandling()
 
+        // Route remote (HTTP) UI commands to this activity's WebView.
+        KioskBus.uiHandler = { cmd -> runOnUiThread { handleRemoteCommand(cmd) } }
+        KioskHttpService.start(this)
+
         loadStartUrl()
+    }
+
+    /** Handles WebView-related commands coming from the HTTP control endpoint. */
+    private fun handleRemoteCommand(cmd: RemoteCommand) {
+        when (cmd.name) {
+            "loadUrl" -> cmd.url?.let { webView.loadUrl(it) }
+            "loadStartUrl" -> loadStartUrl()
+            "reload" -> webView.reload()
+        }
     }
 
     // region Launchers / permissions
@@ -113,14 +124,21 @@ class MainActivity : AppCompatActivity() {
     }
     // endregion
 
-    // region Window / fullscreen
+    // region Window
     private fun configureWindow() {
+        // No app title/action bar (removes the white "Kiosk Browser" strip).
+        supportActionBar?.hide()
+
+        // Screen on/off, brightness and sleep timeout are left to the device's
+        // own settings. We only force-keep-on if the admin explicitly enabled it.
         if (prefs.keepScreenOn) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
-        // Show over the lock screen / keyguard.
+
+        // Show over the lock screen and turn the screen on when shown, so the
+        // remote "screenOn" command reveals the kiosk.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
@@ -132,24 +150,10 @@ class MainActivity : AppCompatActivity() {
                     WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             )
         }
-        applyFullscreen()
-    }
-
-    private fun applyFullscreen() {
-        if (!prefs.fullscreen) {
-            WindowCompat.setDecorFitsSystemWindows(window, true)
-            return
-        }
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        val controller = WindowInsetsControllerCompat(window, binding.root)
-        controller.hide(WindowInsetsCompat.Type.systemBars())
-        controller.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) applyFullscreen()
+        // The system status bar stays visible and pull-down works. Lock-task
+        // mode (the Kiosk Mode toggle) is what prevents leaving the app, not
+        // hiding the bars.
+        WindowCompat.setDecorFitsSystemWindows(window, true)
     }
     // endregion
 
@@ -319,7 +323,6 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.menu_settings),
             getString(R.string.menu_reload),
             getString(R.string.menu_go_home),
-            getString(R.string.menu_unlock_exit),
         )
         AlertDialog.Builder(this)
             .setTitle(R.string.admin_menu)
@@ -328,21 +331,8 @@ class MainActivity : AppCompatActivity() {
                     0 -> startActivity(Intent(this, SettingsActivity::class.java))
                     1 -> webView.reload()
                     2 -> loadStartUrl()
-                    3 -> confirmExit()
                 }
             }
-            .show()
-    }
-
-    private fun confirmExit() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.exit_kiosk)
-            .setMessage(R.string.exit_kiosk_msg)
-            .setPositiveButton(R.string.exit) { _, _ ->
-                stopKioskLock()
-                finishAffinity()
-            }
-            .setNegativeButton(R.string.cancel, null)
             .show()
     }
     // endregion
@@ -371,8 +361,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        applyFullscreen()
-        startKioskLock()
+        // The Kiosk Mode toggle in settings drives screen pinning: enabling it
+        // pins the app, disabling it unpins (the way to leave the kiosk).
+        if (prefs.lockTask) startKioskLock() else stopKioskLock()
         armAutoReload()
         webView.onResume()
     }
@@ -385,6 +376,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
+        KioskBus.uiHandler = null
         super.onDestroy()
     }
 
@@ -395,9 +387,9 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         /** Number of quick taps anywhere on screen to reveal the admin PIN dialog. */
-        private const val ADMIN_TAP_COUNT = 5
+        private const val ADMIN_TAP_COUNT = 8
 
         /** Taps must arrive within this window of each other to count toward the gesture. */
-        private const val TAP_RESET_MS = 1500L
+        private const val TAP_RESET_MS = 2000L
     }
 }
