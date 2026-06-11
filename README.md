@@ -6,10 +6,10 @@ full-screen WebView that users cannot exit, with a hidden PIN-protected admin pa
 
 ## Features
 
-- **Full-screen immersive WebView** — status & navigation bars hidden.
+- **First-run setup** — on first launch the app asks for the single URL to lock to (no default search engine); only that URL opens.
+- **Full-screen immersive WebView** — status & navigation bars hidden, no title/top bar.
 - **Lock-task / screen pinning** — prevents leaving the app (true kiosk when set as Device Owner).
-- **Configurable start URL** via the settings panel.
-- **Hidden admin access** — tap the **top-right corner 7×**, then enter the PIN (default `1234`).
+- **Hidden admin access** — **tap anywhere on the screen 5× quickly**, then enter the PIN (default `1234`).
 - **Admin menu** — open settings, reload, go to start URL, or unlock & exit.
 - **Keep screen on** and show over the lock screen.
 - **Auto-start on boot** (`BootReceiver`).
@@ -26,7 +26,8 @@ full-screen WebView that users cannot exit, with a hidden PIN-protected admin pa
 app/src/main/
   AndroidManifest.xml
   java/uz/kiosk/browser/
-    MainActivity.kt            # WebView + kiosk lock + fullscreen + admin
+    MainActivity.kt            # WebView + kiosk lock + fullscreen + admin (tap 5x)
+    SetupActivity.kt           # First-run screen: asks for the locked URL + PIN
     SettingsActivity.kt        # PIN-protected settings (PreferenceFragment)
     Prefs.kt                   # Typed settings access
     KioskWebViewClient.kt      # Navigation control + host whitelist
@@ -73,17 +74,18 @@ adb shell dpm set-device-owner uz.kiosk.browser/.KioskDeviceAdminReceiver
 ```
 
 Then lock-task mode engages silently and Home/Recents are blocked.
-To remove: open the admin menu (corner 7× + PIN) → **Unlock & Exit**, or
+To remove: open the admin menu (tap screen 5× + PIN) → **Unlock & Exit**, or
 `adb shell dpm remove-active-admin uz.kiosk.browser/.KioskDeviceAdminReceiver`.
 
 ## Default settings
 
-| Setting        | Default                  |
-|----------------|--------------------------|
-| Start URL      | `https://www.google.com` |
-| Admin PIN      | `1234`                   |
-| Fullscreen     | on                       |
-| Lock task      | on                       |
-| Start on boot  | on                       |
+| Setting        | Default                       |
+|----------------|-------------------------------|
+| Start URL      | _asked on first-run setup_     |
+| Admin PIN      | `1234` (set on setup screen)  |
+| Fullscreen     | on                            |
+| Lock task      | on                            |
+| Start on boot  | on                            |
 
-Change them in the admin settings panel after first launch.
+On first launch a setup screen asks for the URL and PIN. Change them later in
+the admin settings panel (tap the screen 5× → enter PIN → **Open Settings**).

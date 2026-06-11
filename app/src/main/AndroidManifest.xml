@@ -48,6 +48,13 @@
         </activity>
 
         <activity
+            android:name=".SetupActivity"
+            android:exported="false"
+            android:label="@string/setup_title"
+            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout"
+            android:theme="@style/Theme.KioskBrowser" />
+
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/settings_title"

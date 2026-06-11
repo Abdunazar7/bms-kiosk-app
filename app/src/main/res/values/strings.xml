@@ -3,6 +3,16 @@
     <string name="app_name">Kiosk Browser</string>
     <string name="settings_title">Kiosk Settings</string>
 
+    <!-- First-run setup -->
+    <string name="setup_title">Kiosk Setup</string>
+    <string name="setup_subtitle">Enter the website this device will be locked to. Only this URL will open.</string>
+    <string name="setup_url_hint">Website URL (e.g. example.com)</string>
+    <string name="setup_url_error">Please enter a URL</string>
+    <string name="setup_pin_hint">Admin PIN</string>
+    <string name="setup_pin_helper">Used to open the admin panel later</string>
+    <string name="setup_save">Start Kiosk</string>
+    <string name="setup_admin_hint">Tip: tap the screen 5 times quickly to open the admin panel.</string>
+
     <!-- Admin dialog -->
     <string name="admin_access">Admin Access</string>
     <string name="admin_menu">Admin Menu</string>

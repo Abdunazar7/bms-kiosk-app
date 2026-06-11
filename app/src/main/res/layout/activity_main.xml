@@ -33,13 +33,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Invisible hot corner (top-right): tap 7x to open the admin PIN dialog -->
-    <View
-        android:id="@+id/adminHotCorner"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:background="@android:color/transparent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <!-- Admin access: tap anywhere on screen 5x quickly (see MainActivity.dispatchTouchEvent) -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

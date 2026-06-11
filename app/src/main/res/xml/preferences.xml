@@ -7,7 +7,6 @@
             android:key="start_url"
             android:title="@string/pref_start_url"
             android:summary="@string/pref_start_url_sum"
-            android:defaultValue="https://www.google.com"
             android:dialogTitle="@string/pref_start_url" />
 
         <EditTextPreference

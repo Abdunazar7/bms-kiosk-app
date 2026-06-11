@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
 
     private var cornerTapCount = 0
     private var lastTapTime = 0L
+    private var isPinDialogShowing = false
 
     private val idleResetRunnable = Runnable { loadStartUrl() }
     private val autoReloadRunnable = object : Runnable {
@@ -62,6 +63,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
+
+        // First run (or URL cleared): send the user to the setup screen and stop.
+        if (!prefs.isConfigured) {
+            startActivity(Intent(this, SetupActivity::class.java))
+            finish()
+            return
+        }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -72,7 +81,6 @@ class MainActivity : AppCompatActivity() {
         configureWindow()
         setupWebView()
         setupRefresh()
-        setupHiddenAdminAccess()
         setupBackHandling()
 
         loadStartUrl()
@@ -262,20 +270,27 @@ class MainActivity : AppCompatActivity() {
 
     // region Hidden admin access
     /**
-     * Tapping the top-right corner 7 times within a few seconds opens the
-     * PIN-protected admin dialog. No visible button keeps it hidden from users.
+     * Tapping ANYWHERE on the screen 5 times in quick succession opens the
+     * PIN-protected admin dialog. Counting happens in [dispatchTouchEvent] so it
+     * works from any position without blocking normal web interaction.
      */
-    private fun setupHiddenAdminAccess() {
-        binding.adminHotCorner.setOnClickListener {
-            val now = System.currentTimeMillis()
-            if (now - lastTapTime > 3000) cornerTapCount = 0
-            lastTapTime = now
-            cornerTapCount++
-            if (cornerTapCount >= 7) {
-                cornerTapCount = 0
-                promptForPin()
-            }
+    private fun registerAdminTap() {
+        val now = System.currentTimeMillis()
+        if (now - lastTapTime > TAP_RESET_MS) cornerTapCount = 0
+        lastTapTime = now
+        cornerTapCount++
+        if (cornerTapCount >= ADMIN_TAP_COUNT) {
+            cornerTapCount = 0
+            if (!isPinDialogShowing) promptForPin()
         }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_DOWN) {
+            registerAdminTap()
+            armIdleReset()
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun promptForPin() {
@@ -283,6 +298,7 @@ class MainActivity : AppCompatActivity() {
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
             hint = getString(R.string.enter_pin)
         }
+        isPinDialogShowing = true
         AlertDialog.Builder(this)
             .setTitle(R.string.admin_access)
             .setView(input)
@@ -294,6 +310,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton(R.string.cancel, null)
+            .setOnDismissListener { isPinDialogShowing = false }
             .show()
     }
 
@@ -374,5 +391,13 @@ class MainActivity : AppCompatActivity() {
     override fun onUserInteraction() {
         super.onUserInteraction()
         armIdleReset()
+    }
+
+    companion object {
+        /** Number of quick taps anywhere on screen to reveal the admin PIN dialog. */
+        private const val ADMIN_TAP_COUNT = 5
+
+        /** Taps must arrive within this window of each other to count toward the gesture. */
+        private const val TAP_RESET_MS = 1500L
     }
 }

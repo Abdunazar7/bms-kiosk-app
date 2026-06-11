@@ -12,9 +12,14 @@ class Prefs(context: Context) {
 
     private val sp = PreferenceManager.getDefaultSharedPreferences(context.applicationContext)
 
+    /** The single URL the kiosk is locked to. Empty until the user completes setup. */
     var startUrl: String
-        get() = sp.getString(KEY_START_URL, DEFAULT_URL)!!.trim().ifEmpty { DEFAULT_URL }
-        set(value) = sp.edit().putString(KEY_START_URL, value).apply()
+        get() = sp.getString(KEY_START_URL, "")!!.trim()
+        set(value) = sp.edit().putString(KEY_START_URL, value.trim()).apply()
+
+    /** True once the user has entered a start URL on the first-run setup screen. */
+    val isConfigured: Boolean
+        get() = startUrl.isNotEmpty()
 
     /** PIN that protects the hidden admin/settings panel. */
     var adminPin: String
@@ -61,7 +66,6 @@ class Prefs(context: Context) {
             .filter { it.isNotEmpty() }
 
     companion object {
-        const val DEFAULT_URL = "https://www.google.com"
         const val DEFAULT_PIN = "1234"
 
         const val KEY_START_URL = "start_url"
