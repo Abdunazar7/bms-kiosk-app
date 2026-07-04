@@ -347,6 +347,7 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.menu_settings),
             getString(R.string.menu_reload),
             getString(R.string.menu_go_home),
+            getString(R.string.menu_check_update),
         )
         AlertDialog.Builder(this)
             .setTitle(R.string.admin_menu)
@@ -355,10 +356,14 @@ class MainActivity : AppCompatActivity() {
                     0 -> startActivity(Intent(this, SettingsActivity::class.java))
                     1 -> webView.reload()
                     2 -> loadStartUrl()
+                    3 -> Updater.checkForUpdate(this, silent = false)
                 }
             }
             .show()
     }
+
+    /** Called by the updater so the system package installer can appear over the kiosk. */
+    fun leaveKioskForInstall() = stopKioskLock()
     // endregion
 
     // region Back / keys — block exit

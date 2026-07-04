@@ -16,6 +16,8 @@ Pre-built, signed APKs are published as releases here:
 - **Kiosk Mode toggle** — a switch in settings drives screen pinning. Turn it **off to leave the kiosk**.
 - **Hidden admin access** — **tap anywhere on the screen 8× quickly**, then enter the PIN (default `1234`).
 - **HTTP control endpoint** — Home Assistant / curl can send commands (`screenOn`, `loadUrl`, …) — see below.
+- **In-app updater** — admin menu / settings → *Check for updates* downloads and installs the latest release APK from GitHub.
+- **Auto-start at boot** — relaunches after reboot. On Android 10+/Xiaomi this needs *Display over other apps* + *Autostart* (buttons in Settings → Startup &amp; permissions).
 - **Screen control left to the device** — brightness and sleep follow the tablet's own settings; remote `screenOn` wakes it.
 - **Admin menu** — open settings, reload, go to start URL, or unlock & exit.
 - **Keep screen on** and show over the lock screen.

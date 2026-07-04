@@ -24,6 +24,7 @@
     <string name="menu_settings">Open Settings</string>
     <string name="menu_reload">Reload Page</string>
     <string name="menu_go_home">Go to Start URL</string>
+    <string name="menu_check_update">Check for updates</string>
     <string name="menu_unlock_exit">Unlock &amp; Exit Kiosk</string>
     <string name="exit_kiosk">Exit Kiosk?</string>
     <string name="exit_kiosk_msg">This will unpin the screen and close the kiosk app.</string>
@@ -70,4 +71,26 @@
     <string name="pref_remote_password">HTTP password</string>
     <string name="pref_remote_password_sum">Required on every request (?password=…)</string>
     <string name="remote_notif_text">HTTP control listening on port %1$d</string>
+
+    <!-- Startup & permissions -->
+    <string name="cat_startup">Startup &amp; permissions</string>
+    <string name="perm_overlay_title">Display over other apps</string>
+    <string name="perm_overlay_sum">Required so the kiosk can auto-launch itself at boot (Android 10+)</string>
+    <string name="perm_autostart_title">Autostart (Xiaomi / MIUI, Huawei…)</string>
+    <string name="perm_autostart_sum">Whitelist the app so boot broadcasts are delivered. Needed for \"Start on boot\".</string>
+    <string name="perm_autostart_manual">Find Kiosk Browser in the list and enable Autostart</string>
+
+    <!-- About &amp; updates -->
+    <string name="cat_about">About &amp; updates</string>
+    <string name="pref_app_version">App version</string>
+    <string name="pref_check_update">Check for updates</string>
+    <string name="pref_check_update_sum">Download the latest release from GitHub</string>
+    <string name="upd_checking">Checking for updates…</string>
+    <string name="upd_uptodate">Latest version already installed (v%1$s)</string>
+    <string name="upd_error">Update failed — check the internet connection.</string>
+    <string name="upd_available_title">Update available</string>
+    <string name="upd_available_msg">Installed: v%1$s\nAvailable: v%2$s\n\nDownload and install now?</string>
+    <string name="upd_download">Download &amp; install</string>
+    <string name="upd_downloading">Downloading update…</string>
+    <string name="upd_allow_install">Allow installing apps, then run the update again</string>
 </resources>

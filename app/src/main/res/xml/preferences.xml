@@ -125,4 +125,32 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/cat_startup">
+
+        <Preference
+            android:key="perm_overlay"
+            android:title="@string/perm_overlay_title"
+            android:summary="@string/perm_overlay_sum" />
+
+        <Preference
+            android:key="perm_autostart"
+            android:title="@string/perm_autostart_title"
+            android:summary="@string/perm_autostart_sum" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/cat_about">
+
+        <Preference
+            android:key="app_version"
+            android:title="@string/pref_app_version"
+            android:selectable="false" />
+
+        <Preference
+            android:key="check_update"
+            android:title="@string/pref_check_update"
+            android:summary="@string/pref_check_update_sum" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>
