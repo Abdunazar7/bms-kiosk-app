@@ -127,13 +127,20 @@ object Updater {
     }
 
     private fun install(activity: Activity, file: File) {
-        // Leave lock-task so the system installer can appear over the kiosk.
-        (activity as? MainActivity)?.leaveKioskForInstall()
+        // Leave lock-task and pause the watchdog so the system installer can appear.
+        KioskBus.suppressWatchdog()
+        try {
+            activity.stopLockTask() // works from any of our activities in the locked task
+        } catch (e: Exception) {
+        }
 
         // Android 8+: the app needs permission to install packages.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             !activity.packageManager.canRequestPackageInstalls()
         ) {
+            // Remember the download so the install finishes automatically once the
+            // user grants permission and returns (resumePendingInstall in onResume).
+            KioskBus.pendingUpdateApkPath = file.absolutePath
             toast(activity, activity.getString(R.string.upd_allow_install))
             activity.startActivity(
                 Intent(
@@ -144,12 +151,36 @@ object Updater {
             return
         }
 
+        launchInstaller(activity, file)
+    }
+
+    private fun launchInstaller(activity: Activity, file: File) {
+        if (!file.exists()) return
         val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.fileprovider", file)
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, "application/vnd.android.package-archive")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         activity.startActivity(intent)
+    }
+
+    /**
+     * Finish an install that was blocked waiting for the "install unknown apps"
+     * permission. Called from onResume of our activities; a no-op if nothing is
+     * pending or the permission still isn't granted.
+     */
+    fun resumePendingInstall(activity: Activity) {
+        val path = KioskBus.pendingUpdateApkPath ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            !activity.packageManager.canRequestPackageInstalls()
+        ) return
+        KioskBus.pendingUpdateApkPath = null
+        KioskBus.suppressWatchdog()
+        try {
+            activity.stopLockTask()
+        } catch (e: Exception) {
+        }
+        launchInstaller(activity, File(path))
     }
 
     /** True when [remote] (e.g. "1.0.2") is a higher version than [local] ("1.0.1"). */

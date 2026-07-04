@@ -1,9 +1,12 @@
 package uz.kiosk.browser
 
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -41,18 +44,94 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
 
+            findPreference<Preference>("perm_home")?.setOnPreferenceClickListener {
+                (activity as? AppCompatActivity)?.let { KioskLauncher.requestBeDefaultHome(it) }
+                true
+            }
+
             findPreference<Preference>("perm_overlay")?.setOnPreferenceClickListener {
-                openOverlaySettings(); true
+                KioskBus.suppressWatchdog(); openOverlaySettings(); true
+            }
+
+            findPreference<Preference>("perm_battery")?.setOnPreferenceClickListener {
+                KioskBus.suppressWatchdog(); openBatteryOptimization(); true
             }
 
             findPreference<Preference>("perm_autostart")?.setOnPreferenceClickListener {
-                openAutostartSettings(); true
+                KioskBus.suppressWatchdog(); openAutostartSettings(); true
+            }
+
+            findPreference<Preference>("perm_miui_other")?.setOnPreferenceClickListener {
+                KioskBus.suppressWatchdog(); openMiuiOtherPermissions(); true
             }
         }
 
         override fun onResume() {
             super.onResume()
+            // Watchdog suppression is lifted centrally in KioskApp.onActivityStarted.
+            // If an update was waiting on install permission, resume it now.
+            activity?.let { Updater.resumePendingInstall(it) }
             showDeviceAddress()
+            refreshStatuses()
+        }
+
+        /** Live green/red status for the three API-readable requirements. */
+        private fun refreshStatuses() {
+            val ctx = requireContext()
+            val ok = getString(R.string.status_ok)
+            val no = getString(R.string.status_missing)
+
+            findPreference<Preference>("perm_home")?.summary =
+                getString(R.string.perm_home_sum, if (KioskLauncher.isDefaultHome(ctx)) ok else no)
+
+            val overlayOk = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(ctx)
+            findPreference<Preference>("perm_overlay")?.summary =
+                getString(R.string.perm_overlay_state, if (overlayOk) ok else no)
+
+            val pm = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
+            val battOk = Build.VERSION.SDK_INT < Build.VERSION_CODES.M ||
+                pm.isIgnoringBatteryOptimizations(ctx.packageName)
+            findPreference<Preference>("perm_battery")?.summary =
+                getString(R.string.perm_battery_state, if (battOk) ok else no)
+        }
+
+        @android.annotation.SuppressLint("BatteryLife")
+        private fun openBatteryOptimization() {
+            val pkg = requireContext().packageName
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                try {
+                    val i = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$pkg"))
+                    startActivity(i)
+                    return
+                } catch (e: Exception) {
+                }
+            }
+            try {
+                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            } catch (e: Exception) {
+                openAppDetails()
+            }
+        }
+
+        /** MIUI "Other permissions" (pop-up in background, show on lock screen, …). */
+        private fun openMiuiOtherPermissions() {
+            val pkg = requireContext().packageName
+            val candidates = listOf(
+                "com.miui.securitycenter" to "com.miui.permcenter.permissions.PermissionsEditorActivity",
+                "com.miui.securitycenter" to "com.miui.permcenter.permissions.AppPermissionsEditorActivity",
+            )
+            for ((p, c) in candidates) {
+                try {
+                    startActivity(Intent().apply {
+                        component = ComponentName(p, c)
+                        putExtra("extra_pkgname", pkg)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    })
+                    return
+                } catch (e: Exception) {
+                }
+            }
+            openAppDetails()
         }
 
         /** "Display over other apps" — lets the app relaunch itself at boot on Android 10+. */
@@ -85,6 +164,7 @@ class SettingsActivity : AppCompatActivity() {
                 try {
                     startActivity(Intent().apply {
                         component = ComponentName(pkg, cls)
+                        putExtra("extra_pkgname", requireContext().packageName)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     })
                     return

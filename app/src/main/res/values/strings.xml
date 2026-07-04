@@ -25,6 +25,14 @@
     <string name="menu_reload">Reload Page</string>
     <string name="menu_go_home">Go to Start URL</string>
     <string name="menu_check_update">Check for updates</string>
+    <string name="menu_set_home">Set as Home app</string>
+    <string name="menu_restore_launcher">Restore system launcher</string>
+    <string name="later">Later</string>
+
+    <!-- Default-home nag -->
+    <string name="home_nag_title">Make the kiosk auto-start</string>
+    <string name="home_nag_msg">For the kiosk to reopen after a reboot, set Kiosk Browser as the device\'s default Home app. Choose \"Always\" when asked.</string>
+    <string name="home_nag_set">Set as Home app</string>
     <string name="menu_unlock_exit">Unlock &amp; Exit Kiosk</string>
     <string name="exit_kiosk">Exit Kiosk?</string>
     <string name="exit_kiosk_msg">This will unpin the screen and close the kiosk app.</string>
@@ -74,11 +82,20 @@
 
     <!-- Startup & permissions -->
     <string name="cat_startup">Startup &amp; permissions</string>
+    <string name="status_ok">✓ ON</string>
+    <string name="status_missing">✗ OFF — tap to fix</string>
+    <string name="perm_home_title">Set as Home app (survives reboot)</string>
+    <string name="perm_home_sum">Default Home app: %1$s</string>
     <string name="perm_overlay_title">Display over other apps</string>
-    <string name="perm_overlay_sum">Required so the kiosk can auto-launch itself at boot (Android 10+)</string>
+    <string name="perm_overlay_sum">Required so the kiosk can relaunch itself in the background</string>
+    <string name="perm_overlay_state">Granted: %1$s</string>
+    <string name="perm_battery_title">Battery: No restrictions</string>
+    <string name="perm_battery_state">Unrestricted: %1$s</string>
     <string name="perm_autostart_title">Autostart (Xiaomi / MIUI, Huawei…)</string>
     <string name="perm_autostart_sum">Whitelist the app so boot broadcasts are delivered. Needed for \"Start on boot\".</string>
     <string name="perm_autostart_manual">Find Kiosk Browser in the list and enable Autostart</string>
+    <string name="perm_miui_other_title">MIUI: pop-up in background &amp; lock screen</string>
+    <string name="perm_miui_other_sum">Enable \"Display pop-up windows while running in the background\" and \"Show on lock screen\"</string>
 
     <!-- About &amp; updates -->
     <string name="cat_about">About &amp; updates</string>

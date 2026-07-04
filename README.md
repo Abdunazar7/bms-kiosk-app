@@ -17,7 +17,7 @@ Pre-built, signed APKs are published as releases here:
 - **Hidden admin access** — **tap anywhere on the screen 8× quickly**, then enter the PIN (default `1234`).
 - **HTTP control endpoint** — Home Assistant / curl can send commands (`screenOn`, `loadUrl`, …) — see below.
 - **In-app updater** — admin menu / settings → *Check for updates* downloads and installs the latest release APK from GitHub.
-- **Auto-start at boot** — relaunches after reboot. On Android 10+/Xiaomi this needs *Display over other apps* + *Autostart* (buttons in Settings → Startup &amp; permissions).
+- **Survives reboot** — the app can be set as the **default Home launcher**, so the system opens the kiosk automatically after every reboot and returns to it on Home. Backed up by a boot receiver + a foreground-service watchdog that re-fronts the kiosk if it is backgrounded/swiped away.
 - **Screen control left to the device** — brightness and sleep follow the tablet's own settings; remote `screenOn` wakes it.
 - **Admin menu** — open settings, reload, go to start URL, or unlock & exit.
 - **Keep screen on** and show over the lock screen.
@@ -87,6 +87,32 @@ adb shell dpm set-device-owner uz.kiosk.browser/.KioskDeviceAdminReceiver
 Then lock-task mode engages silently and Home/Recents are blocked.
 To remove: open the admin menu (tap screen 5× + PIN) → **Unlock & Exit**, or
 `adb shell dpm remove-active-admin uz.kiosk.browser/.KioskDeviceAdminReceiver`.
+
+## Survive reboot (without Device Owner)
+
+On devices where ADB Device Owner isn't possible (e.g. Xiaomi/HyperOS), make the
+kiosk reopen after every reboot by setting it as the **default Home app** and
+granting a few OEM permissions. Open the admin panel (tap the screen 8× → PIN →
+**Open Settings → Startup &amp; permissions**), then:
+
+1. **Set as Home app** — the key step. The system launches the default Home
+   activity at the end of every boot, so the kiosk reappears with no reliance on
+   flaky boot broadcasts. Pressing Home also returns to the kiosk. Pick
+   *Kiosk Browser* and *Always* when the chooser appears.
+2. **Display over other apps** — lets the app re-front itself from the background.
+3. **Battery: No restrictions** — stops the OS from killing it.
+4. **Autostart** (Xiaomi/MIUI, Huawei, Oppo, Vivo) — boot broadcasts are dropped
+   without it.
+5. **MIUI: pop-up in background & lock screen** — the separate MIUI gate for
+   background relaunch.
+
+The Settings screen shows live ✓/✗ status for the three readable permissions
+(Home, overlay, battery). To hand Home back to the stock launcher later, use the
+admin menu → **Restore system launcher**.
+
+> Honest limit: without Device Owner a determined operator can still reach system
+> settings and force-stop the app. This makes leaving *hard* and every escape
+> loop back to the kiosk, but it is a strong deterrent, not an absolute lock.
 
 ## Remote HTTP control (Home Assistant)
 

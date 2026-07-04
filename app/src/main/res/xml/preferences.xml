@@ -128,14 +128,29 @@
     <PreferenceCategory android:title="@string/cat_startup">
 
         <Preference
+            android:key="perm_home"
+            android:title="@string/perm_home_title"
+            android:summary="@string/perm_home_title" />
+
+        <Preference
             android:key="perm_overlay"
             android:title="@string/perm_overlay_title"
             android:summary="@string/perm_overlay_sum" />
 
         <Preference
+            android:key="perm_battery"
+            android:title="@string/perm_battery_title"
+            android:summary="@string/perm_battery_title" />
+
+        <Preference
             android:key="perm_autostart"
             android:title="@string/perm_autostart_title"
             android:summary="@string/perm_autostart_sum" />
+
+        <Preference
+            android:key="perm_miui_other"
+            android:title="@string/perm_miui_other_title"
+            android:summary="@string/perm_miui_other_sum" />
 
     </PreferenceCategory>
 

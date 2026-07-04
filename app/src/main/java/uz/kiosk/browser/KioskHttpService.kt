@@ -1,16 +1,22 @@
 package uz.kiosk.browser
 
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
+import android.os.SystemClock
+import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import fi.iki.elonen.NanoHTTPD
@@ -31,6 +37,24 @@ class KioskHttpService : Service() {
     private lateinit var prefs: Prefs
     private var server: ControlServer? = null
 
+    private val handler = Handler(Looper.getMainLooper())
+    private var watchdogStarted = false
+    private val watchdog = object : Runnable {
+        override fun run() {
+            try {
+                // Re-front the kiosk only when the WHOLE app is backgrounded (so we
+                // never fight our own Settings/Setup) and background starts are allowed.
+                if (prefs.lockTask && !KioskBus.isWatchdogSuppressed() &&
+                    !KioskBus.appInForeground() && canStartFromBackground()
+                ) {
+                    launchKiosk(reorder = true)
+                }
+            } catch (e: Exception) {
+            }
+            handler.postDelayed(this, WATCHDOG_INTERVAL_MS)
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         prefs = Prefs(this)
@@ -47,16 +71,78 @@ class KioskHttpService : Service() {
                 // Port busy or networking unavailable; keep the kiosk running.
             }
         }
+
+        if (intent?.action == ACTION_BOOT_LAUNCH) {
+            launchKioskWithRetry(0)
+        }
+
+        if (!watchdogStarted) {
+            watchdogStarted = true
+            handler.postDelayed(watchdog, WATCHDOG_INTERVAL_MS)
+        }
         return START_STICKY
     }
 
+    /** A Recents swipe removes our task — bring the kiosk straight back. */
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        try {
+            if (prefs.lockTask && !KioskBus.isWatchdogSuppressed()) {
+                launchKiosk(reorder = true)
+                // Re-arm ourselves shortly after, in case the system also stops us.
+                val restart = PendingIntent.getService(
+                    this, 1, Intent(this, KioskHttpService::class.java),
+                    PendingIntent.FLAG_ONE_SHOT or pendingImmutable()
+                )
+                val am = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                am.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 800, restart)
+            }
+        } catch (e: Exception) {
+        }
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
         server?.stop()
         server = null
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    // region kiosk relaunch
+    private fun launchKioskWithRetry(attempt: Int) {
+        // Without the overlay grant, a background activity start is silently
+        // dropped on Android 10+ — don't spin; being the Home app covers this.
+        if (!canStartFromBackground()) return
+        val shown = launchKiosk(reorder = false)
+        // Retry only if the start actually failed (threw). A successful start that
+        // then redirects to Setup is a legitimate terminal state, not a reason to
+        // keep relaunching (that would bounce the operator out of setup).
+        if (!shown && attempt < BOOT_MAX_RETRIES) {
+            handler.postDelayed({ launchKioskWithRetry(attempt + 1) }, BOOT_RETRY_MS)
+        }
+    }
+
+    private fun launchKiosk(reorder: Boolean): Boolean {
+        return try {
+            val i = Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                if (reorder) addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+            startActivity(i)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun canStartFromBackground(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || Settings.canDrawOverlays(this)
+
+    private fun pendingImmutable(): Int =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+    // endregion
 
     // region foreground notification
     private fun startInForeground() {
@@ -186,6 +272,11 @@ class KioskHttpService : Service() {
 
     companion object {
         private const val NOTIF_ID = 7321
+        const val ACTION_BOOT_LAUNCH = "uz.kiosk.browser.BOOT_LAUNCH"
+
+        private const val WATCHDOG_INTERVAL_MS = 2000L
+        private const val BOOT_RETRY_MS = 1500L
+        private const val BOOT_MAX_RETRIES = 10
 
         fun start(context: Context) {
             val intent = Intent(context, KioskHttpService::class.java)

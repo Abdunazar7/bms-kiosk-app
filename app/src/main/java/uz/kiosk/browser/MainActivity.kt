@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
     private var cornerTapCount = 0
     private var lastTapTime = 0L
     private var isPinDialogShowing = false
+    private var nagShown = false
 
     private val idleResetRunnable = Runnable { loadStartUrl() }
     private val autoReloadRunnable = object : Runnable {
@@ -348,6 +349,8 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.menu_reload),
             getString(R.string.menu_go_home),
             getString(R.string.menu_check_update),
+            getString(R.string.menu_set_home),
+            getString(R.string.menu_restore_launcher),
         )
         AlertDialog.Builder(this)
             .setTitle(R.string.admin_menu)
@@ -357,13 +360,12 @@ class MainActivity : AppCompatActivity() {
                     1 -> webView.reload()
                     2 -> loadStartUrl()
                     3 -> Updater.checkForUpdate(this, silent = false)
+                    4 -> KioskLauncher.requestBeDefaultHome(this)
+                    5 -> KioskLauncher.openHomeSettings(this)  // escape hatch: hand Home back to MIUI
                 }
             }
             .show()
     }
-
-    /** Called by the updater so the system package installer can appear over the kiosk. */
-    fun leaveKioskForInstall() = stopKioskLock()
     // endregion
 
     // region Back / keys — block exit
@@ -390,6 +392,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Watchdog suppression is lifted centrally in KioskApp.onActivityStarted.
+        Updater.resumePendingInstall(this)
         applyImmersive()
         // Re-read toggles that may have changed in settings.
         binding.swipeRefresh.isEnabled = prefs.pullToRefresh
@@ -398,12 +402,36 @@ class MainActivity : AppCompatActivity() {
         if (prefs.lockTask) startKioskLock() else stopKioskLock()
         armAutoReload()
         webView.onResume()
+        maybeNagDefaultHome()
     }
 
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(autoReloadRunnable)
         webView.onPause()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        // Delivered when Home is pressed and we are the default launcher (singleTask
+        // reuses this instance instead of leaving the kiosk). Re-assert the kiosk.
+        applyImmersive()
+        if (prefs.lockTask) startKioskLock()
+    }
+
+    /**
+     * If Kiosk Mode is on but the app is NOT the default Home launcher, the kiosk
+     * won't reappear after a reboot. Prompt the operator to fix that (once per run).
+     */
+    private fun maybeNagDefaultHome() {
+        if (nagShown || !prefs.lockTask || KioskLauncher.isDefaultHome(this)) return
+        nagShown = true
+        AlertDialog.Builder(this)
+            .setTitle(R.string.home_nag_title)
+            .setMessage(R.string.home_nag_msg)
+            .setPositiveButton(R.string.home_nag_set) { _, _ -> KioskLauncher.requestBeDefaultHome(this) }
+            .setNegativeButton(R.string.later, null)
+            .show()
     }
 
     override fun onDestroy() {
